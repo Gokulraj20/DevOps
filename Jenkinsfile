@@ -52,5 +52,17 @@ pipeline{
             }
         }
     }
+    post{
+        success{
+            emailtext body: 'The Build was successfully completed',
+                subject: 'Build successful',
+                to: 'emaiid'     // replace email id
+        }
+        failure{
+            emailtext body: 'The Build failed',
+                subject: 'Build failure',
+                to: 'emaiid'    // replace email id
+        }
+    }
 
     }
