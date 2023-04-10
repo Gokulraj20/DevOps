@@ -1,0 +1,9 @@
+variable "region" {}
+variable "project-name" {}
+variable "vpc-cidr" {}
+variable "public-subnet-az1-cidr" {}
+variable "public-subnet-az2-cidr" {}
+variable "private-app-subnet-az1-cidr" {}
+variable "private-app-subnet-az2-cidr" {}
+variable "private-db-subnet-az1-cidr" {}
+variable "private-db-subnet-az2-cidr" {}
