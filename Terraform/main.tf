@@ -37,23 +37,40 @@ resource "aws_internet_gateway" "igw" {
     }
 }
 
-# Create Nat Gateway
-resource "aws_nat_gateway" "Nat-gw" {
+# Create Elastic ip before creating Nat gateway
+resource "aws_eip" "Nateip" {
+    //vpc = true
     count = 2
-    allocation_id = aws_eip.eip[count.index + 1].id
+    tags = {
+      "Name" = "Nateip-${count.index +1}"
+    }
+}
+
+
+# Create Nat Gateway
+resource "aws_nat_gateway" "Natgw" {
+    count = 2
+    allocation_id = aws_eip.Nateip[count.index + 1].id
     subnet_id = aws_subnet.Private_subnet[count.index].id
     tags = {
       Name = "nat-gateway-${count.index +1}"
     }
 }
 
+# Elastic ip associaton
+resource "aws_eip_association" "nat_eip_association" {
+    count = 2
+    eip = aws_eip.Nateip[count.index].id
+    instance = aws_nat_gateway.Natgw.id 
+}
 
-# Route table for Public and Private subnets
+
+# Create Route table for Public and Private subnets
 resource "aws_route_table" "PublicRT" {
     vpc_id = aws_vpc.my_vpc.id
     route = {
         cidr_block ="0.0.0.0/0"
-        gateway_id = 
+        gateway_id = aws_internet_gateway.igw.id
     }
 }
 
@@ -61,6 +78,17 @@ resource "aws_route_table" "PrivateRT" {
     vpc_id = aws_vpc.my_vpc.id
     route = {
         cidr_block ="0.0.0.0/0"
-        nat_gateway_id = 
+        nat_gateway_id = aws_nat_gateway.Natgw.id
     }
+}
+
+# Route table associations with Private and Public subnets
+resource "aws_route_table_association" "publicRTassociation" {
+    subnet_id = aws_subnet.Public_subnet.id
+    route_table_id = aws_route_table.PublicRT.id
+}
+
+resource "aws_route_table_association" "privateRTassociation" {
+    subnet_id = aws_subnet.Private_subnet.id
+    route_table_id = aws_route_table.PrivateRT.id
 }
