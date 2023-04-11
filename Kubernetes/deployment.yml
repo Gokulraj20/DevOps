@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app-deployment
+  labels:
+    name: my-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-app-container
+          image: my-app-image:latest 
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+            requests:
+              cpu: ""
+              memory: ""
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+              initialDelaySeconds: 10
+              periodSeconds: 5
+              failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 80
+              initialDelaySeconds: 30
+              periodSeconds: 10
+              failureThreshold: 5
